@@ -22,6 +22,8 @@ client.on("messageCreate", (message) => {
 		message.reply("🏓 Pong!");
 	}
 });
-
+client.once("ready", () => {
+  console.log(`✅ Bot login sebagai ${client.user.tag}`);
+});
 // Login pakai token dari .env
 client.login(process.env.DISCORD_TOKEN);
