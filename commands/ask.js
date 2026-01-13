@@ -4,7 +4,7 @@ const Groq = require("groq-sdk");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("ask")
-    .setDescription("Tanya ke AI Llama 3 (via Groq)")
+    .setDescription("Tanya ke AI Llama 3.1 (via Groq)")
     .addStringOption(option =>
       option
         .setName("question")
@@ -18,15 +18,12 @@ module.exports = {
     const question = interaction.options.getString("question");
 
     try {
-      // Cek API Key
       if (!process.env.GROQ_API_KEY) {
         throw new Error("API Key Groq belum diset di .env");
       }
 
-      // Inisialisasi Groq
       const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-      // Request ke AI
       const chatCompletion = await groq.chat.completions.create({
         messages: [
           {
@@ -34,23 +31,26 @@ module.exports = {
             content: question,
           },
         ],
-        // Model Llama 3 (Cepat & Pintar)
-        model: "llama3-8b-8192", 
+        // UPDATE: Menggunakan model Llama 3.1 yang aktif saat ini
+        model: "llama-3.1-8b-instant", 
       });
 
-      // Ambil jawaban
       const answer = chatCompletion.choices[0]?.message?.content || "";
 
-      // Kirim ke Discord (Potong jika > 2000 char)
       if (answer.length > 2000) {
-        await interaction.editReply(answer.substring(0, 1990) + "...\n(Dipotong)");
+        await interaction.editReply(answer.substring(0, 1990) + "...\n(Dipotong karena limit Discord)");
       } else {
         await interaction.editReply(answer);
       }
 
     } catch (err) {
       console.error("Groq Error:", err);
-      await interaction.editReply("❌ Gagal menghubungi AI (Groq Error).");
+      // Tampilkan pesan error yang lebih jelas ke Discord (opsional, untuk debugging)
+      let msg = "❌ Gagal menghubungi AI.";
+      if (err.message.includes("401")) msg = "❌ API Key Groq salah.";
+      if (err.message.includes("404") || err.message.includes("400")) msg = "❌ Model AI sedang gangguan/ganti versi.";
+      
+      await interaction.editReply(msg);
     }
   }
 };
