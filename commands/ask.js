@@ -1,5 +1,12 @@
 const { SlashCommandBuilder } = require("discord.js");
-const fetch = require("node-fetch");
+const response = await fetch(url, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+  },
+  body: JSON.stringify(data)
+});
 
 module.exports = {
   data: new SlashCommandBuilder()
