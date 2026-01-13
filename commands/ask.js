@@ -7,7 +7,7 @@ module.exports = {
     .addStringOption(option =>
       option
         .setName("question")
-        .setDescription("Apa yang ingin kamu tanyakan?")
+        .setDescription("Pertanyaan kamu")
         .setRequired(true)
     ),
 
@@ -18,7 +18,7 @@ module.exports = {
 
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: {
@@ -27,6 +27,7 @@ module.exports = {
           body: JSON.stringify({
             contents: [
               {
+                role: "user",
                 parts: [{ text: question }]
               }
             ]
@@ -36,15 +37,17 @@ module.exports = {
 
       const data = await response.json();
 
+      console.log("Gemini response:", JSON.stringify(data, null, 2));
+
       const reply =
         data.candidates?.[0]?.content?.parts?.[0]?.text ||
-        "AI tidak menjawab 😢";
+        "⚠️ AI tidak memberi jawaban.";
 
       await interaction.editReply(reply);
 
-    } catch (error) {
-      console.error(error);
-      await interaction.editReply("❌ Terjadi error saat menghubungi AI");
+    } catch (err) {
+      console.error(err);
+      await interaction.editReply("❌ Gagal menghubungi AI Gemini");
     }
   }
 };
