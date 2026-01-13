@@ -1,33 +1,36 @@
 const { SlashCommandBuilder } = require("discord.js");
-const response = await fetch(url, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
-  },
-  body: JSON.stringify(data)
-});
+
 
 module.exports = {
-  data: new SlashCommandBuilder()
-    .setName("ask")
-    .setDescription("Tanya AI")
-    .addStringOption(option =>
-      option
-        .setName("prompt")
-        .setDescription("Apa yang ingin kamu tanyakan?")
-        .setRequired(true)
-    ),
+  name: 'ask',
+  description: 'Tanya ke AI',
 
   async execute(interaction) {
-    const prompt = interaction.options.getString("prompt");
+    await interaction.deferReply();
 
-    await interaction.deferReply(); // biar gak timeout
+    const question = interaction.options.getString('question');
 
-    // === CONTOH AI (DUMMY) ===
-    // Nanti ini kita ganti ke OpenAI
-    const aiReply = `Kamu bertanya: "${prompt}"\n\n(Jawaban AI di sini)`;
+    const response = await fetch(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'user', content: question }
+          ]
+        })
+      }
+    );
 
-    await interaction.editReply(aiReply);
+    const data = await response.json();
+
+    await interaction.editReply(
+      data.choices?.[0]?.message?.content || 'AI tidak menjawab 😢'
+    );
   }
 };
