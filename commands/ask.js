@@ -3,7 +3,7 @@ const { SlashCommandBuilder } = require("discord.js");
 
 module.exports = {
   name: 'ask',
-  description: 'Tanya ke AI',
+  description: 'Tanya ke AI (Gemini)',
 
   async execute(interaction) {
     await interaction.deferReply();
@@ -11,17 +11,17 @@ module.exports = {
     const question = interaction.options.getString('question');
 
     const response = await fetch(
-      'https://api.openai.com/v1/chat/completions',
+      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { role: 'user', content: question }
+          contents: [
+            {
+              parts: [{ text: question }]
+            }
           ]
         })
       }
@@ -29,8 +29,10 @@ module.exports = {
 
     const data = await response.json();
 
-    await interaction.editReply(
-      data.choices?.[0]?.message?.content || 'AI tidak menjawab 😢'
-    );
+    const answer =
+      data.candidates?.[0]?.content?.parts?.[0]?.text
+      || 'AI tidak menjawab 😢';
+
+    await interaction.editReply(answer);
   }
 };
