@@ -1,43 +1,28 @@
 require("dotenv").config();
-const { Client, GatewayIntentBits, Collection } = require("discord.js");
 const fs = require("fs");
+const path = require("path");
+const { Client, Collection, GatewayIntentBits } = require("discord.js");
 
 const client = new Client({
-	intents: [
-		GatewayIntentBits.Guilds,
-		GatewayIntentBits.GuildMessages,
-		GatewayIntentBits.MessageContent
-	]
+  intents: [GatewayIntentBits.Guilds]
 });
 
-// Bot online
-client.once("ready", () => {
-	console.log(`✅ Bot login sebagai ${client.user.tag}`);
-});
+// Load commands
+client.commands = new Collection();
+const commandsPath = path.join(__dirname, "commands");
+const commandFiles = fs.readdirSync(commandsPath).filter(f => f.endsWith(".js"));
 
-// Event pesan
-client.on("messageCreate", (message) => {
-	if (message.author.bot) return;
+for (const file of commandFiles) {
+  const command = require(path.join(commandsPath, file));
+  client.commands.set(command.data.name, command);
+}
 
-	if (message.content === "!ping") {
-		message.reply("🏓 Pong!");
-	}
-});
+// Ready
 client.once("ready", () => {
   console.log(`✅ Bot login sebagai ${client.user.tag}`);
 });
 
-client.commands = new Collection();
-
-const commandFiles = fs
-  .readdirSync("./commands")
-  .filter(file => file.endsWith(".js"));
-
-for (const file of commandFiles) {
-  const command = require(`./commands/${file}`);
-  client.commands.set(command.data.name, command);
-}
-
+// Slash command handler
 client.on("interactionCreate", async interaction => {
   if (!interaction.isChatInputCommand()) return;
 
@@ -46,11 +31,15 @@ client.on("interactionCreate", async interaction => {
 
   try {
     await command.execute(interaction);
-  } catch (err) {
-    console.error(err);
-    await interaction.reply({ content: "Terjadi error", ephemeral: true });
+  } catch (error) {
+    console.error(error);
+
+    if (interaction.deferred || interaction.replied) {
+      await interaction.editReply("❌ Terjadi error");
+    } else {
+      await interaction.reply({ content: "❌ Terjadi error", ephemeral: true });
+    }
   }
 });
 
-// Login pakai token dari .env
 client.login(process.env.DISCORD_TOKEN);
