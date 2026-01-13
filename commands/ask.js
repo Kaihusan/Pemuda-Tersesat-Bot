@@ -28,7 +28,7 @@ module.exports = {
       // 3. Setup Model menggunakan SDK
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
       // Gunakan 'gemini-1.5-flash' yang lebih cepat dan hemat
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
       // 4. Kirim request ke AI
       const result = await model.generateContent(question);
