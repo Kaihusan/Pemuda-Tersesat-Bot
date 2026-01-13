@@ -1,26 +1,50 @@
-const { REST, Routes } = require('discord.js');
-require('dotenv').config();
+const { SlashCommandBuilder } = require('discord.js');
 
-const commands = [
-  {
-    name: 'ping',
-    description: 'Balas pong!'
+module.exports = {
+  data: new SlashCommandBuilder()
+    .setName('ask')
+    .setDescription('Tanya ke AI Gemini')
+    .addStringOption(option =>
+      option
+        .setName('question')
+        .setDescription('Pertanyaan kamu')
+        .setRequired(true)
+    ),
+
+  async execute(interaction) {
+    await interaction.deferReply();
+
+    const question = interaction.options.getString('question');
+
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [{ text: question }]
+              }
+            ]
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      const answer =
+        data.candidates?.[0]?.content?.parts?.[0]?.text
+        || 'AI tidak menjawab 😢';
+
+      await interaction.editReply(answer);
+
+    } catch (error) {
+      console.error(error);
+      await interaction.editReply('❌ Gagal menghubungi AI');
+    }
   }
-];
-
-const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
-
-(async () => {
-  try {
-    console.log('⏳ Deploying slash commands...');
-
-    await rest.put(
-      Routes.applicationCommands(process.env.CLIENT_ID),
-      { body: commands }
-    );
-
-    console.log('✅ Slash commands deployed!');
-  } catch (error) {
-    console.error(error);
-  }
-})();
+};
