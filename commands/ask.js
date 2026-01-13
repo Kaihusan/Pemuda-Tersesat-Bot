@@ -18,17 +18,20 @@ module.exports = {
 
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent?key=${process.env.GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             contents: [
               {
-                role: "user",
-                parts: [{ text: question }]
+                parts: [
+                  {
+                    text: `Kamu adalah AI Discord yang ramah dan membantu.\n\n${question}`
+                  }
+                ]
               }
             ]
           })
@@ -37,17 +40,16 @@ module.exports = {
 
       const data = await response.json();
 
-      console.log("Gemini response:", JSON.stringify(data, null, 2));
+      const answer =
+        data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-      const reply =
-        data.candidates?.[0]?.content?.parts?.[0]?.text ||
-        "⚠️ AI tidak memberi jawaban.";
+      await interaction.editReply(
+        answer || "⚠️ AI tidak memberi jawaban"
+      );
 
-      await interaction.editReply(reply);
-
-    } catch (err) {
-      console.error(err);
-      await interaction.editReply("❌ Gagal menghubungi AI Gemini");
+    } catch (error) {
+      console.error(error);
+      await interaction.editReply("❌ Terjadi error saat menghubungi AI");
     }
   }
 };
