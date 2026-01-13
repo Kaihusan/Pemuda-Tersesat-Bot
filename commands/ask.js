@@ -16,9 +16,10 @@ module.exports = {
 
     const question = interaction.options.getString("question");
 
-    try {
+try {
+      // GANTI URL DI SINI
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: {
@@ -27,13 +28,16 @@ module.exports = {
           body: JSON.stringify({
             contents: [
               {
-                role: "user",
                 parts: [{ text: question }]
               }
             ]
           })
         }
       );
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.statusText}`);
+      }
 
       const data = await response.json();
       console.log("Gemini response:", JSON.stringify(data, null, 2));
