@@ -41,5 +41,30 @@ client.on("interactionCreate", async interaction => {
     }
   }
 });
+const askGroq = require("./ai/groqAsk");
 
+client.on("messageCreate", async message => {
+  if (message.author.bot) return;
+  if (!message.content.startsWith("!ask")) return;
+
+  const question = message.content.slice(4).trim();
+  if (!question) {
+    return message.reply("❓ Contoh: `!ask apa itu AI?`");
+  }
+
+  try {
+    const reply = await message.reply("🤖 AI sedang berpikir...");
+
+    const answer = await askGroq(question);
+
+    await reply.edit(
+      answer.length > 2000
+        ? answer.slice(0, 1990) + "...\n(Dipotong)"
+        : answer
+    );
+  } catch (err) {
+    console.error(err);
+    message.reply("❌ Gagal menjawab");
+  }
+});
 client.login(process.env.DISCORD_TOKEN);

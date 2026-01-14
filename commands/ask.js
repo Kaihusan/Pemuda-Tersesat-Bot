@@ -1,10 +1,10 @@
 const { SlashCommandBuilder } = require("discord.js");
-const Groq = require("groq-sdk");
+const askGroq = require("../ai/groqAsk");
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("ask")
-    .setDescription("Tanya ke AI Llama 3.1 (via Groq)")
+    .setDescription("Tanya ke AI")
     .addStringOption(option =>
       option
         .setName("question")
@@ -15,42 +15,18 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply();
 
-    const question = interaction.options.getString("question");
-
     try {
-      if (!process.env.GROQ_API_KEY) {
-        throw new Error("API Key Groq belum diset di .env");
-      }
+      const question = interaction.options.getString("question");
+      const answer = await askGroq(question);
 
-      const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
-      const chatCompletion = await groq.chat.completions.create({
-        messages: [
-          {
-            role: "user",
-            content: question,
-          },
-        ],
-        // UPDATE: Menggunakan model Llama 3.1 yang aktif saat ini
-        model: "llama-3.1-8b-instant", 
-      });
-
-      const answer = chatCompletion.choices[0]?.message?.content || "";
-
-      if (answer.length > 2000) {
-        await interaction.editReply(answer.substring(0, 1990) + "...\n(Dipotong karena limit Discord)");
-      } else {
-        await interaction.editReply(answer);
-      }
-
+      await interaction.editReply(
+        answer.length > 2000
+          ? answer.slice(0, 1990) + "...\n(Dipotong)"
+          : answer
+      );
     } catch (err) {
-      console.error("Groq Error:", err);
-      // Tampilkan pesan error yang lebih jelas ke Discord (opsional, untuk debugging)
-      let msg = "❌ Gagal menghubungi AI.";
-      if (err.message.includes("401")) msg = "❌ API Key Groq salah.";
-      if (err.message.includes("404") || err.message.includes("400")) msg = "❌ Model AI sedang gangguan/ganti versi.";
-      
-      await interaction.editReply(msg);
+      console.error(err);
+      await interaction.editReply("❌ Error AI");
     }
   }
 };
