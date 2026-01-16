@@ -15,36 +15,36 @@ First
                             -administrator
 
 Second
-Open console.groq.com.
-Then create API key and save it
+  Open console.groq.com.
+  Then create API key and save it
 
 Third
-Open your code editor and open terminal and paste
+  Open your code editor and open terminal and paste
 
-git clone https://github.com/Kaihusan/Combine-Bot-Discord-with-Assistant-AI.git
-cd Combine-Bot-Discord-with-Assistant-AI
-npm install
+  git clone https://github.com/Kaihusan/Combine-Bot-Discord-with-Assistant-AI.git
+  cd Combine-Bot-Discord-with-Assistant-AI
+  npm install
 
 Fourth
-Create .env (i assume you know how to do that)
-Then paste 
+  Create .env (i assume you know how to do that)
+  Then paste 
 
-DISCORD_TOKEN=YOUR_DISCORD_BOT_TOKEN
-GROQ_API_KEY=YOUR_GROQ_API_KEY
-CLIENT_ID=YOUR_APPLICATION_ID
-GUILD_ID=YOUR_SERVER_ID
-and save it
+  DISCORD_TOKEN=YOUR_DISCORD_BOT_TOKEN
+  GROQ_API_KEY=YOUR_GROQ_API_KEY
+  CLIENT_ID=YOUR_APPLICATION_ID
+  GUILD_ID=YOUR_SERVER_ID
+  and save it
 
 Fifth
-Running the bot 
-node index.js
-If successful, you should see: ✅ Bot logged in as BotName#0000
+  Running the bot 
+  node index.js
+  If successful, you should see: ✅ Bot logged in as BotName#0000
 
 Sixth
-Push your project to GitHub
-Import the repository into Railway
-Set Environment Variables in Railway same as the .env (one variable per line)
-Deploy 
+  Push your project to GitHub
+  Import the repository into Railway
+  Set Environment Variables in Railway same as the .env (one variable per line)
+  Deploy 
 
 And it's Done
 If this project helps you, feel free to give it a ⭐
