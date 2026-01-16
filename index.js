@@ -12,6 +12,23 @@ const client = new Client({
   ]
 });
 
+//auto role when people join
+//if you want to deactive just command
+client.on("guildMemberAdd", async member => {
+  try {
+    // GANTI dengan ID ROLE kamu
+    const roleId = "1375103158618947584";
+
+    const role = member.guild.roles.cache.get(roleId);
+    if (!role) return console.log("Role tidak ditemukan");
+
+    await member.roles.add(role);
+    console.log(`✅ ${member.user.tag} diberi role ${role.name}`);
+  } catch (err) {
+    console.error("❌ Gagal memberi role:", err);
+  }
+});
+
 // Load commands
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, "commands");
@@ -47,7 +64,7 @@ client.on("interactionCreate", async interaction => {
   }
 });
 const askGroq = require("./ai/groqAsk");
-
+//command massage
 client.on("messageCreate", async message => {
   if (message.author.bot) return;
   if (!message.content.startsWith("!ask")) return;
